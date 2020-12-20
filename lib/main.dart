@@ -14,13 +14,6 @@ import 'pages/profile.dart';
 import 'pages/news.dart';
 import 'pages/posts.dart';
 
-
-final LocalStorage storage1 = new LocalStorage('User');
-    User user1 = null;
-    Map<String, dynamic> map1 = storage1.getItem('User');
-  
-      user1 = User.fromJson(map1);
- 
 final List<Widget> imageSliders = imgList
     .map((item) => Container(
           child: Container(
@@ -48,7 +41,7 @@ final List<Widget> imageSliders = imgList
                         padding: EdgeInsets.symmetric(
                             vertical: 10.0, horizontal: 20.0),
                         child: Text(
-                          'Covid19 statistic in jamaica \ndeath: 259 \nrecover: 6,61 \ncases: 10,909 '+user1.firstname,
+                          'Covid19 statistic in jamaica \ndeath: 259 \nrecover: 6,61 \ncases: 10,909 ',
                           style: TextStyle(
                             color: Colors.white,
                             fontSize: 20.0,
