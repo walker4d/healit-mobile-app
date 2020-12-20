@@ -1,3 +1,4 @@
+import 'package:click_counter/pages/createPost.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'models/user.dart';
@@ -13,6 +14,13 @@ import 'pages/profile.dart';
 import 'pages/news.dart';
 import 'pages/posts.dart';
 
+
+final LocalStorage storage1 = new LocalStorage('User');
+    User user1 = null;
+    Map<String, dynamic> map1 = storage1.getItem('User');
+  
+      user1 = User.fromJson(map1);
+ 
 final List<Widget> imageSliders = imgList
     .map((item) => Container(
           child: Container(
@@ -40,7 +48,7 @@ final List<Widget> imageSliders = imgList
                         padding: EdgeInsets.symmetric(
                             vertical: 10.0, horizontal: 20.0),
                         child: Text(
-                          'Covid19 statistic in jamaica \ndeath: 259 \nrecover: 6,61 \ncases: 10,909',
+                          'Covid19 statistic in jamaica \ndeath: 259 \nrecover: 6,61 \ncases: 10,909 '+user1.firstname,
                           style: TextStyle(
                             color: Colors.white,
                             fontSize: 20.0,
@@ -200,7 +208,23 @@ class _MyHomePageState extends State<MyHomePage> {
                         'Healit',
                         style: TextStyle(fontSize: 50, fontFamily: "Samantha"),
                       ),
-                      IconButton(icon: Icon(Icons.add), onPressed: () {})
+                      IconButton(
+                          icon: Icon(Icons.add),
+                          onPressed: () {
+                            if (storage.getItem("User") != null) {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => CreatePost()),
+                              );
+                            } else {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => LoginPage()),
+                              );
+                            }
+                          })
                     ],
                   ),
                 ),

@@ -1,9 +1,17 @@
-import 'package:flutter/material.dart';
+import 'dart:io';
 
-import 'dart:convert';
+import 'package:click_counter/models/user.dart';
+import 'package:click_counter/pages/signup.dart';
+import 'package:flutter/material.dart';
+import 'package:select_dialog/select_dialog.dart';
 import 'dart:async';
 import 'package:http/http.dart' as http;
+import 'package:image_picker/image_picker.dart';
 import 'package:localstorage/localstorage.dart';
+import 'dart:convert';
+import 'package:dio/dio.dart';
+import 'package:loading/loading.dart';
+import 'package:loading/indicator/ball_pulse_indicator.dart';
 
 import '../main.dart';
 
@@ -16,190 +24,103 @@ class CreatePost extends StatefulWidget {
 
 class _State extends State<CreatePost> {
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
+  TextEditingController title = TextEditingController();
+  TextEditingController description = TextEditingController();
+
+  TextEditingController tags = TextEditingController();
+  String authorName, titles, desc;
+  String dropdownValue = 'Report/Complaint';
+  String image;
+  File selectedImage;
+  bool _isLoading = false;
+
+  String imageUrl = '';
+
+  bool isloading = false;
+  Future uploadImage() async {
+    const url = "https://api.cloudinary.com/v1_1/healit/image/upload";
+    var image = await ImagePicker.pickImage(source: ImageSource.gallery);
+
+    setState(() {
+      isloading = true;
+    });
+
+    Dio dio = Dio();
+    FormData formData = new FormData.fromMap({
+      "file": await MultipartFile.fromFile(
+        image.path,
+      ),
+      "upload_preset": "healit",
+      "cloud_name": "healit",
+    });
+    try {
+      Response response = await dio.post(url, data: formData);
+
+      var data = jsonDecode(response.toString());
+      print(data['secure_url']);
+
+      setState(() {
+        isloading = false;
+        imageUrl = data['secure_url'];
+      });
+    } catch (e) {
+      print(e);
+    }
+  }
+
+  uploadBlog() async {
+    if (selectedImage != null) {
+      setState(() {
+        isloading = true;
+      });
+    } else {}
+  }
+
+  Future<http.Response> Create(title, description) async {
+    final LocalStorage storage = new LocalStorage('User');
+    Map<String, dynamic> map = storage.getItem('User');
+    User user = User.fromJson(map);
+    var url = 'http://10.0.2.2:8000/posts/create';
+     var map1 = Map.fromIterable(ex5, value: (e) => e);
+                          print(map1);
+    print(url);
+    final http.Response response = await http.post(url,
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+        body: jsonEncode(<String, String>{
+          'Title': title,
+          'Description': description,
+          'image': imageUrl,
+          'Tags': ['mobile'],
+          'userid': user.id,
+          'Author': user.firstname + ' ' + user.lastname
+        }));
+    if (response.statusCode == 200) {
+      return response;
+    } else {
+      print('failed to login');
+      return null;
+    }
+  }
+
+  List<String> ex5 = [];
+
+  // final modelItems = List.generate(50, (index) => 'hi');
+  final List<String> Tags = ['Post', 'NSFW', 'Info', 'Feedback', 'Discussion'];
   @override
   Widget build(BuildContext context) {
     var screenHeight = MediaQuery.of(context).size.height;
     var screenWidth = MediaQuery.of(context).size.width;
     var storage = new LocalStorage('User');
+    File selectedImage;
+    bool _isLoading = false;
+
     String current_user = '';
 
     return Scaffold(
-      key: _scaffoldKey,
-      drawer: new Drawer(
-        child: ListView(
-          padding: EdgeInsets.zero,
-          children: <Widget>[
-            DrawerHeader(
-              child: Text(
-                'Healit',
-                style: TextStyle(color: Colors.white, fontSize: 25),
-              ),
-              decoration: BoxDecoration(
-                  color: Colors.green,
-                  image: DecorationImage(
-                      fit: BoxFit.fill,
-                      image: AssetImage('assets/images/cover.jpg'))),
-            ),
-            ListTile(
-              leading: Icon(Icons.input),
-              title: Text('Home'),
-              onTap: () => {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => MyHomePage()),
-                )
-              },
-            ),
-            ListTile(
-              leading: Icon(Icons.border_color),
-              title: Text('self diagnostic '),
-              onTap: () => {Navigator.of(context).pop()},
-            ),
-            storage.getItem("User") != null
-                ? ListTile(
-                    leading: Icon(Icons.verified_user),
-                    title: Text('Profile'),
-                    onTap: () => {Navigator.of(context).pop()},
-                  )
-                : ListTile(
-                    leading: Icon(Icons.exit_to_app),
-                    title: Text('Login'),
-                    onTap: () => {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => LoginPage()),
-                      ),
-                    },
-                  ),
-            storage.getItem("User") == null
-                ? ListTile()
-                : ListTile(
-                    leading: Icon(Icons.exit_to_app),
-                    title: Text('Logout'),
-                    onTap: () => {storage.deleteItem('User')},
-                  ),
-          ],
-        ),
-      ),
-      body: Container(
-        height: screenHeight,
-        width: screenWidth,
-        child: SafeArea(
-          child: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: <Widget>[
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(10, 5, 10, 5),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: <Widget>[
-                      IconButton(
-                        icon: Icon(Icons.menu),
-                        onPressed: () => _scaffoldKey.currentState.openDrawer(),
-                      ),
-                      storage.getItem("User") == null
-                          ? Text(
-                              "Healit- Create",
-                              style: TextStyle(
-                                  fontSize: 30, fontFamily: "Samantha"),
-                            )
-                          : Text(
-                              'Healit-  Create',
-                              style: TextStyle(
-                                  fontSize: 30, fontFamily: "Samantha"),
-                            ),
-                      IconButton(icon: Icon(Icons.add), onPressed: () {})
-                    ],
-                  ),
-                ),
-                Column(
-                  children: [
-// Postcard(),
-                    CreateForm(),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-Widget Postcard() {
-  return Card(
-    clipBehavior: Clip.antiAlias,
-    child: Column(
-      children: [
-        ListTile(
-          leading: Icon(Icons.arrow_drop_down_circle),
-          title: const Text('benefits of herb'),
-          subtitle: Text(
-            'Annette Walker',
-            style: TextStyle(color: Colors.black.withOpacity(0.6)),
-          ),
-        ),
-        Image.network(
-            'https://res.cloudinary.com/healit/image/upload/v1606429158/images/rdr4ibhtupp00bp4igvo.jpg'),
-        Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Text(
-            'these herbs are certainly good but what makes them good is the fact that they provide nutrients to us in away that imporves ones health.',
-            style: TextStyle(color: Colors.black.withOpacity(0.6)),
-          ),
-        ),
-        ButtonBar(
-          alignment: MainAxisAlignment.start,
-          children: [
-            FlatButton(
-              onPressed: () {
-                // Perform some action
-              },
-              child: const Text('dislike 1'),
-            ),
-            FlatButton(
-              onPressed: () {
-                // Perform some action
-              },
-              child: const Text('like 2'),
-            ),
-          ],
-        ),
-      ],
-    ),
-  );
-}
-
-Future<http.Response> Create(email, password) async {
-  var url = 'http://10.0.2.2:8000/login';
-  print(url);
-  final http.Response response = await http.post(url,
-      headers: <String, String>{
-        'Content-Type': 'application/json; charset=UTF-8',
-      },
-      body: jsonEncode(<String, String>{'email': email, 'password': password}));
-  if (response.statusCode == 200) {
-    return response;
-  } else {
-    print('failed to login');
-    return null;
-  }
-}
-
-Widget CreateForm() {
-  TextEditingController title = TextEditingController();
-  TextEditingController description = TextEditingController();
-  TextEditingController image = TextEditingController();
-
-  TextEditingController tags = TextEditingController();
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
         appBar: AppBar(
-          title: Text('Login'),
+          title: Text('create - Post'),
         ),
         body: Padding(
             padding: EdgeInsets.all(10),
@@ -209,7 +130,7 @@ Widget CreateForm() {
                     alignment: Alignment.center,
                     padding: EdgeInsets.all(10),
                     child: Text(
-                      'Login to healit',
+                      'Create Post',
                       style: TextStyle(
                           color: Colors.green,
                           fontWeight: FontWeight.w500,
@@ -235,22 +156,82 @@ Widget CreateForm() {
                     ),
                   ),
                 ),
-                Container(
-                  padding: EdgeInsets.all(10),
-                  child: TextField(
-                    controller: title,
-                    decoration: InputDecoration(
-                      border: OutlineInputBorder(),
-                      labelText: 'enter the title',
-                    ),
-                  ),
+                GestureDetector(
+                    onTap: () async {
+                      print('tap');
+                      await uploadImage();
+                    },
+                    child: imageUrl != ''
+                        ? Container(
+                            margin: EdgeInsets.symmetric(horizontal: 16),
+                            height: 170,
+                            width: MediaQuery.of(context).size.width,
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(6),
+                              child: Image.network(
+                                imageUrl,
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                          )
+                        : Container(
+                            margin: EdgeInsets.symmetric(horizontal: 16),
+                            height: 170,
+                            decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(6)),
+                            width: MediaQuery.of(context).size.width,
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.add_a_photo,
+                                  color: Colors.black45,
+                                ),
+                                Text("Tap to select image.")
+                              ],
+                            ),
+                          )),
+                SizedBox(
+                  height: 8,
                 ),
-                FlatButton(
+                RaisedButton(
+                  child: Text(
+                    ex5.isEmpty ? "Multiple Items Example" : ex5.join(", "),
+                  ),
                   onPressed: () {
-                    //forgot password screen
+                    SelectDialog.showModal<String>(
+                      context,
+                      label: "Multiple Items Example",
+                      multipleSelectedValues: ex5,
+                      items: Tags,
+                      itemBuilder: (context, item, isSelected) {
+                        return ListTile(
+                          trailing: isSelected ? Icon(Icons.check) : null,
+                          title: Text(item),
+                          selected: isSelected,
+                        );
+                      },
+                      onMultipleItemsChange: (List<String> selected) {
+                        setState(() {
+                          print(selected);
+                          ex5 = selected;
+                         
+                        });
+                      },
+                      okButtonBuilder: (context, onPressed) {
+                        return Align(
+                          alignment: Alignment.centerRight,
+                          child: FloatingActionButton(
+                            onPressed: onPressed,
+                            child: Icon(Icons.check),
+                            mini: true,
+                          ),
+                        );
+                      },
+                    );
                   },
-                  textColor: Colors.green,
-                  child: Text('Forgot Password'),
                 ),
                 Container(
                     height: 50,
@@ -258,45 +239,16 @@ Widget CreateForm() {
                     child: RaisedButton(
                       textColor: Colors.white,
                       color: Colors.green,
-                      child: Text('Login'),
+                      child: Text('Create Post'),
                       onPressed: () async {
-                        print(nameController.text);
-                        print(passwordController.text);
-                        http.Response response = await login(
-                            nameController.text, passwordController.text);
-                        print('after login');
+                        http.Response response =
+                            await Create(title.text, description.text);
+
                         if (response != null) {
-                          final LocalStorage storage = new LocalStorage('User');
-
-                          Map<String, dynamic> map = jsonDecode(response.body);
-                          print('after jsondecode');
-
-                          User user = User.fromJson(map['user']);
-                          print('from json' + user.firstname);
-
-                          storage.setItem('User', map['user']);
-                          print('set item,');
-                          print(storage.getItem('User'));
+                          
                           Navigator.push(
                             context,
                             MaterialPageRoute(builder: (context) => MyApp()),
-                          );
-                          AlertDialog(
-                            title: Text("login was succes"),
-                            content: Text(
-                                "Would you like to continue learning how to use Flutter alerts?"),
-                            actions: [
-                              FlatButton(
-                                child: Text("Continue"),
-                                onPressed: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (context) => MyApp()),
-                                  );
-                                },
-                              )
-                            ],
                           );
                         } else {
                           return AlertDialog(
@@ -307,26 +259,6 @@ Widget CreateForm() {
                         }
                       },
                     )),
-                Container(
-                    child: Row(
-                  children: <Widget>[
-                    Text('Does not have account?'),
-                    FlatButton(
-                      textColor: Colors.green,
-                      child: Text(
-                        'Sign Up',
-                        style: TextStyle(fontSize: 20),
-                      ),
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => SignupPage()),
-                        );
-                      },
-                    )
-                  ],
-                  mainAxisAlignment: MainAxisAlignment.center,
-                ))
               ],
             )));
   }

@@ -19,17 +19,10 @@ class Profile extends State<ProfilePage> {
   Widget build(BuildContext context) {
     final LocalStorage storage = new LocalStorage('User');
 
-    // User user = User.fromJson(storage.getItem("User"));
-    // print(user);
-
     Map<String, dynamic> map = storage.getItem('User');
-    // print('after jsondecode');
 
     User user = User.fromJson(map);
-    // print('from json' + user.firstname);
 
-    // storage.setItem('User', map['user']);
-    // print('set item,');
     print(user);
     return Scaffold(
         appBar: AppBar(
@@ -112,53 +105,8 @@ class Profile extends State<ProfilePage> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
-                      postcard(),
-                      // Expanded(
-                      //   child: Column(
-                      //     children: [
-                      //       Text(
-                      //         "Project",
-                      //         style: TextStyle(
-                      //             color: Colors.blueAccent,
-                      //             fontSize: 22.0,
-                      //             fontWeight: FontWeight.w600),
-                      //       ),
-                      //       SizedBox(
-                      //         height: 7,
-                      //       ),
-                      //       Text(
-                      //         "15",
-                      //         style: TextStyle(
-                      //             color: Colors.black,
-                      //             fontSize: 22.0,
-                      //             fontWeight: FontWeight.w300),
-                      //       )
-                      //     ],
-                      //   ),
-                      // ),
-                      //   Expanded(
-                      //     child: Column(
-                      //       children: [
-                      //         Text(
-                      //           "Followers",
-                      //           style: TextStyle(
-                      //               color: Colors.blueAccent,
-                      //               fontSize: 22.0,
-                      //               fontWeight: FontWeight.w600),
-                      //         ),
-                      //         SizedBox(
-                      //           height: 7,
-                      //         ),
-                      //         Text(
-                      //           "2000",
-                      //           style: TextStyle(
-                      //               color: Colors.black,
-                      //               fontSize: 22.0,
-                      //               fontWeight: FontWeight.w300),
-                      //         )
-                      //       ],
-                      //     ),
-                      //   ),
+                      //  postcard(),
+                    
                     ],
                   ),
                 ),
@@ -169,66 +117,7 @@ class Profile extends State<ProfilePage> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  // RaisedButton(
-                  //   onPressed: () {},
-                  //   shape: RoundedRectangleBorder(
-                  //     borderRadius: BorderRadius.circular(80.0),
-                  //   ),
-                  //   child: Ink(
-                  //     decoration: BoxDecoration(
-                  //       gradient: LinearGradient(
-                  //           begin: Alignment.centerLeft,
-                  //           end: Alignment.centerRight,
-                  //           colors: [Colors.pink, Colors.redAccent]),
-                  //       borderRadius: BorderRadius.circular(30.0),
-                  //     ),
-                  //     child: Container(
-                  //       constraints: BoxConstraints(
-                  //         maxWidth: 100.0,
-                  //         maxHeight: 40.0,
-                  //       ),
-                  //       alignment: Alignment.center,
-                  //       child: Text(
-                  //         "Contact me",
-                  //         style: TextStyle(
-                  //             color: Colors.white,
-                  //             fontSize: 12.0,
-                  //             letterSpacing: 2.0,
-                  //             fontWeight: FontWeight.w300),
-                  //       ),
-                  //     ),
-                  //   ),
-                  // ),
-                  // RaisedButton(
-                  //   onPressed: () {},
-                  //   shape: RoundedRectangleBorder(
-                  //     borderRadius: BorderRadius.circular(80.0),
-                  //   ),
-                  //   child: Ink(
-                  //     decoration: BoxDecoration(
-                  //       gradient: LinearGradient(
-                  //           begin: Alignment.centerLeft,
-                  //           end: Alignment.centerRight,
-                  //           colors: [Colors.pink, Colors.redAccent]),
-                  //       borderRadius: BorderRadius.circular(80.0),
-                  //     ),
-                  //     child: Container(
-                  //       constraints: BoxConstraints(
-                  //         maxWidth: 100.0,
-                  //         maxHeight: 40.0,
-                  //       ),
-                  //       alignment: Alignment.center,
-                  //       child: Text(
-                  //         "Portfolio",
-                  //         style: TextStyle(
-                  //             color: Colors.white,
-                  //             fontSize: 12.0,
-                  //             letterSpacing: 2.0,
-                  //             fontWeight: FontWeight.w300),
-                  //       ),
-                  //     ),
-                  //   ),
-                  // )
+                  
                 ],
               )
             ],

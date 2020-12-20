@@ -22,7 +22,7 @@ class _signup extends State<SignupPage> {
 //   TextEditingController passwordController = TextEditingController();
 
   Future<http.Response> SignupPage(email, password, firstname, lastname) async {
-    var url = 'http://10.0.2.2:8000/register';
+    var url = 'http://10.0.2.2:8000/mobile/register';
 
     print(url);
     final http.Response response = await http.post(url,
